@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Gms.Maps;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
@@ -8,13 +9,16 @@ using System;
 namespace MapApp
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : AppCompatActivity, IOnMapReadyCallback
     {
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
+
+            var mapFragment = (MapFragment)FragmentManager.FindFragmentById(Resource.Id.map);
+            mapFragment.GetMapAsync(this);
 
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
@@ -45,6 +49,11 @@ namespace MapApp
             View view = (View)sender;
             Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
                 .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+        }
+
+        public void OnMapReady(GoogleMap googleMap)
+        {
+            // Do something with the map, i.e. add markers, move to a specific location, etc.
         }
     }
 }
