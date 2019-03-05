@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Gms.Maps;
+using Android.Gms.Maps.Model;
 using Android.OS;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
@@ -11,6 +12,7 @@ namespace MapApp
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity, IOnMapReadyCallback
     {
+        private GoogleMap _map;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -23,8 +25,8 @@ namespace MapApp
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+            //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            //fab.Click += FabOnClick;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -53,7 +55,20 @@ namespace MapApp
 
         public void OnMapReady(GoogleMap googleMap)
         {
-            // Do something with the map, i.e. add markers, move to a specific location, etc.
+            _map = googleMap;
+
+            // Add zoom in/out buttons
+            _map.UiSettings.ZoomControlsEnabled = true;
+
+            // Add custom marker to the map
+            MarkerOptions markerOpt1 = new MarkerOptions();
+            markerOpt1.SetPosition(new LatLng(50.379444, 2.773611));
+            markerOpt1.SetTitle("Vimy Ridge");
+
+            var bmDescriptor = BitmapDescriptorFactory.DefaultMarker(BitmapDescriptorFactory.HueBlue);
+            markerOpt1.SetIcon(bmDescriptor);
+
+            _map.AddMarker(markerOpt1);
         }
     }
 }
