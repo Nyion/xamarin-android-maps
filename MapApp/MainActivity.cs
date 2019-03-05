@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Gms.Location;
 using Android.Gms.Maps;
 using Android.Gms.Maps.Model;
 using Android.OS;
@@ -6,6 +7,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using System;
+using System.Threading.Tasks;
 
 namespace MapApp
 {
@@ -13,11 +15,14 @@ namespace MapApp
     public class MainActivity : AppCompatActivity, IOnMapReadyCallback
     {
         private GoogleMap _map;
+        private FusedLocationProviderClient _fusedLocationProviderClient;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
+
+            _fusedLocationProviderClient = LocationServices.GetFusedLocationProviderClient(this);
 
             var mapFragment = (MapFragment)FragmentManager.FindFragmentById(Resource.Id.map);
             mapFragment.GetMapAsync(this);
@@ -28,6 +33,8 @@ namespace MapApp
             //FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             //fab.Click += FabOnClick;
         }
+
+
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -61,14 +68,36 @@ namespace MapApp
             _map.UiSettings.ZoomControlsEnabled = true;
 
             // Add custom marker to the map
+            var customMarker = CreateMapMarker(new LatLng(50.0, 50.0), "My custom marker", BitmapDescriptorFactory.HueBlue);
+            _map.AddMarker(customMarker);
+
+            var userPosition = GetLastLocationFromDevice().Result;
+            if (userPosition != null)
+            {
+                var userMarker = CreateMapMarker(userPosition, "User", BitmapDescriptorFactory.HueRed);
+                _map.AddMarker(userMarker);
+            }
+        }
+
+        private MarkerOptions CreateMapMarker(LatLng location, string title, float markerColor)
+        {
             MarkerOptions markerOpt1 = new MarkerOptions();
-            markerOpt1.SetPosition(new LatLng(50.379444, 2.773611));
-            markerOpt1.SetTitle("Vimy Ridge");
+            markerOpt1.SetPosition(location);
+            markerOpt1.SetTitle(title);
 
-            var bmDescriptor = BitmapDescriptorFactory.DefaultMarker(BitmapDescriptorFactory.HueBlue);
+            var bmDescriptor = BitmapDescriptorFactory.DefaultMarker(markerColor);
             markerOpt1.SetIcon(bmDescriptor);
+            return markerOpt1;
+        }
 
-            _map.AddMarker(markerOpt1);
+        private async Task<LatLng> GetLastLocationFromDevice()
+        {
+            Android.Locations.Location location = await _fusedLocationProviderClient.GetLastLocationAsync();
+
+            if (location == null)
+                return null;
+
+            return new LatLng(location.Latitude, location.Longitude);
         }
     }
 }
